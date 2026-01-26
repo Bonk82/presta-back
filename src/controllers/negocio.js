@@ -2,13 +2,12 @@ import * as da from '../connection/connexPostgres.js'
 import axios from "axios";
 import fs from 'fs'
 
-//componente
-export const listarComponentes  = async  (datos, respuesta, next) => {
+//cliente
+export const listarClientes  = async  (datos, respuesta, next) => {
   const {opcion,id} = datos.query
   let q = ''
-  if(opcion == 'T') q = `select * from venta.componente c where c.activo=1`;
-  if(opcion != 'T') q = `select * from venta.componente c where c.activo=1 and ${opcion} = '${id}';`;
-
+  if(opcion == 'T') q = `select * from negocio.cliente c where c.activo=1`;
+  if(opcion != 'T') q = `select * from negocio.cliente c where c.activo=1 and ${opcion} = '${id}';`;
   try {
     const consulta = await da.consulta(q);
     respuesta.status(200).json(consulta);
@@ -17,10 +16,10 @@ export const listarComponentes  = async  (datos, respuesta, next) => {
   }
 };
 
-export const crudComponente   = async  (datos, respuesta, next) => {
-  const {operacion,id_componente,fid_producto_main,fid_producto,unidad,cantidad,usuario_registro} = datos.query;
+export const crudCliente   = async  (datos, respuesta, next) => {
+  const {operacion,id_cliente,codigo_cliente,tipo_documento,numero_documento,nombres,paterno,materno,direccion,telefonos,correo,fecha_nacimiento,estado_cliente,calificacion_riesgo,observaciones,usuario_registro} = datos.query;
 
-  let q = `select * from venta.pra_crud_componente('${operacion}',${id_componente},${fid_producto_main},${fid_producto},'${unidad}',${cantidad},${usuario_registro});`;
+  let q = `select * from negocio.pra_crud_cliente('${operacion}',${id_cliente},'${codigo_cliente}','${tipo_documento}','${numero_documento}','${nombres}','${paterno}','${materno}','${direccion}','${telefonos}','${correo}','${fecha_nacimiento}','${estado_cliente}','${calificacion_riesgo}','${observaciones}',${usuario_registro});`;
 
   const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
 
@@ -32,24 +31,14 @@ export const crudComponente   = async  (datos, respuesta, next) => {
   }
 };
 
-//controlCaja
-export const listarControlCajas  = async  (datos, respuesta, next) => {
-  const {opcion,id} = datos.query
+//Cuota
+export const listarCuotas  = async  (datos, respuesta, next) => {
+  const {opcion,id,estado} = datos.query
   let q = ''
-  if(opcion == 'T') q = `select cc.*,ui.cuenta usuario_inicio,s.nombre sucursal, uc.cuenta usuario_cierre
-    from venta.control_caja cc
-    join seguridad.usuario ui on ui.id_usuario =cc.fid_usuario_inicio 
-    join seguridad.sucursal s on s.id_sucursal =cc.fid_sucursal
-    left join seguridad.usuario uc on uc.id_usuario = cc.fid_usuario_cierre
-    order by cc.id_control_caja desc;`;
-  if(opcion != 'T') q = `
-    select cc.*,ui.cuenta usuario_inicio,s.nombre sucursal, uc.cuenta usuario_cierre
-    from venta.control_caja cc
-    join seguridad.usuario ui on ui.id_usuario =cc.fid_usuario_inicio 
-    join seguridad.sucursal s on s.id_sucursal =cc.fid_sucursal
-    left join seguridad.usuario uc on uc.id_usuario = cc.fid_usuario_cierre where ${opcion} = '${id}'
-    order by cc.id_control_caja desc;`;
-  if(opcion == 'ACTIVA') q = `select * from venta.control_caja cc where cc.estado = 'APERTURA' and cc.fid_sucursal = ${id} ;`;
+  if(opcion == 'T') q = `seleect * from negocio.cuota c where c.activo=1 order by c.id_cuota desc;`;
+  if(opcion != 'T') q = `select * from negocio.cuota c where c.activo=1 and ${opcion} = ${id} order by c.id_cuota desc;`;
+  if(opcion == 'ACTIVA') q = `select * from negocio.cuota c where c.activo=1 and now()::date between c.fecha_inicio and c.fecha_fin order by c.id_cuota desc;`;
+  if(opcion == 'ESTADO') q = `select * from negocio.cuota c where c.activo=1 and c.estado_ccuota = '${estado}' order by c.id_cuota;`;
 
   try {
     const consulta = await da.consulta(q);
@@ -59,10 +48,10 @@ export const listarControlCajas  = async  (datos, respuesta, next) => {
   }
 };
 
-export const crudControlCaja  = async  (datos, respuesta, next) => {
-  const {operacion,id_control_caja,fid_sucursal,fid_usuario_inicio,monto_inicio,fid_usuario_cierre,monto_cierre_qr,monto_cierre_tarjeta,monto_cierre_efectivo,monto_cierre_vale,sueldos, monto_caja,observaciones,estado} = datos.query;
+export const crudCuota  = async  (datos, respuesta, next) => {
+  const {operacion,id_cuota,fid_prestamo,numero_cuota,fecha_vencimiento,monto_capital,monto_interes,monto_total,saldo_capital,estado_cuota,fecha_pago,monto_pago,mora_acumulada,dias_mora,observaciones,usuario_registro} = datos.query;
 
-  let q = `select * from venta.pra_crud_control_caja('${operacion}',${id_control_caja},${fid_sucursal},${fid_usuario_inicio},${monto_inicio},${fid_usuario_cierre},${monto_cierre_qr},${monto_cierre_tarjeta},${monto_cierre_efectivo},${monto_cierre_vale},${sueldos},${monto_caja},'${observaciones}','${estado}');`;
+  let q = `select * from negocio.pra_crud_cuota('${operacion}',${id_cuota},${fid_prestamo},${numero_cuota},'${fecha_vencimiento}',${monto_capital},${monto_interes},${monto_total},${saldo_capital},'${estado_cuota}','${fecha_pago}',${monto_pago},${mora_acumulada},${dias_mora},'${observaciones}',${usuario_registro});`;
 
   const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
 
@@ -74,18 +63,12 @@ export const crudControlCaja  = async  (datos, respuesta, next) => {
   }
 };
 
-//ingreso
-export const listarIngresos  = async  (datos, respuesta, next) => {
+//movimiento_prenda
+export const listarMovimientoPrendas  = async  (datos, respuesta, next) => {
   const {opcion,id} = datos.query
   let q = ''
-  if(opcion == 'T') q = `select i.*,s.nombre sucursal,p.nombre proveedor
-    from venta.ingreso i join seguridad.sucursal s on i.fid_sucursal =s.id_sucursal
-    left join venta.proveedor p on p.id_proveedor =i.fid_proveedor
-    where i.activo=1 order by i.id_ingreso desc;`;
-  if(opcion != 'T') q = `select i.*,s.nombre sucursal,p.nombre proveedor
-    from venta.ingreso i join seguridad.sucursal s on i.fid_sucursal =s.id_sucursal
-    left join venta.proveedor p on p.id_proveedor =i.fid_proveedor
-    where i.activo=1 and ${opcion} = '${id}' order by i.id_ingreso desc;`;
+  if(opcion == 'T') q = `select * from negocio.movimiento_prenda mp where mp.activo=1 order by mp.id_movimiento_prenda desc;`;
+  if(opcion != 'T') q = `select * from negocio.movimiento_prenda mp where mp.activo=1 and ${opcion} = ${id} order by mp.id_movimiento_prenda desc;`;
 
   try {
     const consulta = await da.consulta(q);
@@ -95,10 +78,10 @@ export const listarIngresos  = async  (datos, respuesta, next) => {
   }
 };
 
-export const crudIngreso  = async  (datos, respuesta, next) => {
-  const {operacion,id_ingreso,fid_proveedor,fid_sucursal,motivo,fecha_ingreso,usuario_registro} = datos.query;
+export const crudMovimientoPrenda  = async  (datos, respuesta, next) => {
+  const {operacion,id_movimiento,fid_prenda,tipo_movimiento,fid_prestamo,ubicacion_origen,ubicacion_destino,observaciones,fecha_movimiento,usuario_movimiento} = datos.query;
 
-  let q = `select * from venta.pra_crud_ingreso('${operacion}',${id_ingreso},${fid_proveedor},${fid_sucursal},'${motivo}','${fecha_ingreso}',${usuario_registro});`;
+  let q = `select * from negocio.pra_crud_movimiento_prenda('${operacion}',${id_movimiento},${fid_prenda},'${tipo_movimiento}',${fid_prestamo},'${ubicacion_origen}','${ubicacion_destino}','${observaciones}','${fecha_movimiento}',${usuario_movimiento});`;
 
   const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
 
@@ -110,24 +93,12 @@ export const crudIngreso  = async  (datos, respuesta, next) => {
   }
 };
 
-//ingresoDetalle
-export const listarIngresoDetalles  = async  (datos, respuesta, next) => {
+//pago
+export const listarPagos  = async  (datos, respuesta, next) => {
   const {opcion,id} = datos.query
   let q = ''
-  if(opcion == 'T') q = `select id.*, concat_ws(' ',p.descripcion,p.unidad) producto
-    ,concat_ws(' ',s.nombre,i.motivo,to_char(i.fecha_ingreso,'DD/MM/YYYY'))ingreso
-    from venta.ingreso_detalle id
-    join venta.ingreso i on i.id_ingreso =id.fid_ingreso
-    join seguridad.sucursal s on s.id_sucursal = i.fid_sucursal
-    join venta.producto p on p.id_producto =id.fid_producto
-    where id.activo=1;`;
-  if(opcion != 'T') q = `select id.*, concat_ws(' ',p.descripcion,p.unidad) producto
-    ,concat_ws(' ',s.nombre,i.motivo,to_char(i.fecha_ingreso,'DD/MM/YYYY'))ingreso
-    from venta.ingreso_detalle id
-    join venta.ingreso i on i.id_ingreso =id.fid_ingreso
-    join seguridad.sucursal s on s.id_sucursal = i.fid_sucursal
-    join venta.producto p on p.id_producto =id.fid_producto
-    where id.activo=1 and ${opcion} = ${id};`;
+  if(opcion == 'T') q = `select * from negocio.pago p where p.activo=1`;
+  if(opcion != 'T') q = `select * from negocio.pago p where p.activo=1 and ${opcion} = '${id}';`;
 
   try {
     const consulta = await da.consulta(q);
@@ -137,10 +108,10 @@ export const listarIngresoDetalles  = async  (datos, respuesta, next) => {
   }
 };
 
-export const crudIngresoDetalle = async  (datos, respuesta, next) => {
-  const {operacion,id_ingreso_detalle,fid_ingreso,fid_producto,cantidad,precio_compra,usuario_registro} = datos.query;
+export const crudPago = async  (datos, respuesta, next) => {
+  const {operacion,id_pago,codigo_pago,fid_prestamo,fid_cuota,tipo_pago,monto_pago,forma_pago,referencia_pago,fecha_pago,observaciones,usuario_registro} = datos.query;
 
-  let q = `select * from venta.pra_crud_ingreso_detalle('${operacion}',${id_ingreso_detalle},${fid_ingreso},${fid_producto},${cantidad},${precio_compra},${usuario_registro});`;
+  let q = `select * from venta.pra_crud_pago('${operacion}',${id_pago},${codigo_pago},${fid_prestamo},${fid_cuota},'${tipo_pago}',${monto_pago},'${forma_pago}','${referencia_pago}','${fecha_pago}','${observaciones}',${usuario_registro});`;
 
   const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
 
@@ -152,18 +123,12 @@ export const crudIngresoDetalle = async  (datos, respuesta, next) => {
   }
 };
 
-//sucursal_producto
-export const listarSucursalProductos  = async  (datos, respuesta, next) => {
+//prenda
+export const listarPrendas  = async  (datos, respuesta, next) => {
   const {opcion,id} = datos.query
   let q = ''
-  if(opcion == 'T') q = `select sp.*,concat_ws(' - ',p.descripcion,p.unidad) producto, s.nombre sucursal
-    from venta.sucursal_producto sp
-    join venta.producto p on sp.fid_producto = p.id_producto and p.activo =1
-    join seguridad.sucursal s on s.id_sucursal = sp.fid_sucursal and s.activo =1;`;
-  if(opcion != 'T') q = `select sp.*,concat_ws(' - ',p.descripcion,p.unidad) producto, s.nombre sucursal
-    from venta.sucursal_producto sp
-    join venta.producto p on sp.fid_producto = p.id_producto and p.activo =1
-    join seguridad.sucursal s on s.id_sucursal = sp.fid_sucursal and s.activo =1 where ${opcion} = '${id}';`;
+  if(opcion == 'T') q = `select * from negocio.prenda p where p.activo=1`;
+  if(opcion != 'T') q = `select * from negocio.prenda p where p.activo=1 and ${opcion} = '${id}';`;
 
   try {
     const consulta = await da.consulta(q);
@@ -173,10 +138,10 @@ export const listarSucursalProductos  = async  (datos, respuesta, next) => {
   }
 };
 
-export const crudSucursalProdcuto= async  (datos, respuesta, next) => {
-  const {operacion,id_sucursal_producto,fid_sucursal,fid_producto,existencia,precio,promocion} = datos.query;
+export const crudPrenda= async  (datos, respuesta, next) => {
+  const {operacion,id_prenda,codigo_prenda,tipo_prenda,subtipo_prenda,descripcion,material,quilates,peso_bruto,peso_neto,marca,modelo,serie,dimensiones,estado_prenda,condiciones,valor_avaluo,valor_prestamo,porcentaje_prestamo,ubicacion_almacen,fotografia_url,usuario_registro} = datos.query;
 
-  let q = `select * from venta.pra_crud_sucursal_producto('${operacion}',${id_sucursal_producto},${fid_sucursal},${fid_producto},${existencia},${precio},${promocion});`;
+  let q = `select * from negocio.pra_crud_prenda('${operacion}',${id_prenda},'${codigo_prenda}','${tipo_prenda}','${subtipo_prenda}','${descripcion}','${material}',${quilates},${peso_bruto},${peso_neto},'${marca}','${modelo}','${serie}','${dimensiones}','${estado_prenda}','${condiciones}',${valor_avaluo},${valor_prestamo},${porcentaje_prestamo},'${ubicacion_almacen}','${fotografia_url}',${usuario_registro});`;
 
   const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
 
@@ -188,36 +153,12 @@ export const crudSucursalProdcuto= async  (datos, respuesta, next) => {
   }
 };
 
-//pedido
-export const listarPedidos  = async  (datos, respuesta, next) => {
+//prestamo
+export const listarPrestamos  = async  (datos, respuesta, next) => {
   const {opcion,id,id_sucursal} = datos.query
   let q = ''
-  if(opcion == 'T') q = `select * from venta.pedido p`;
-  if(opcion != 'T') q = `select * from venta.pedido p where ${opcion} = ${id};`;
-  if(opcion == 'PEDIDOS') q = `select p.*,(select sum(x.precio_venta ) from venta.pedido_detalle x where x.fid_pedido =p.id_pedido) total
-    ,(select array_to_json(array_agg(row_to_json(det)))
-      from (select pd.*, pr.descripcion producto, pm.nombre promocion,concat(pr.descripcion,pm.nombre)nombre
-        from venta.pedido_detalle pd
-        left join venta.producto pr on pd.fid_producto = pr.id_producto
-        left join venta.promocion pm on pd.fid_promocion = pm.id_promocion 
-        where pd.fid_pedido = p.id_pedido order by 1
-      ) det
-    )consumo
-    from venta.pedido p
-    join venta.control_caja cc on cc.id_control_caja = p.fid_control_caja 
-    where cc.estado ='APERTURA' and p.fid_usuario = ${id} and cc.fid_sucursal = ${id_sucursal} and p.estado != 'ANULADO' order by 1 desc;`;
-  if(opcion == 'CONFIRMADOS') q = `select p.*,u.cuenta
-    ,(select array_to_json(array_agg(row_to_json(det)))
-      from (select pd.*, pr.descripcion producto, pm.nombre promocion,concat(pr.descripcion,pm.nombre)nombre
-        from venta.pedido_detalle pd
-        left join venta.producto pr on pd.fid_producto = pr.id_producto
-        left join venta.promocion pm on pd.fid_promocion = pm.id_promocion 
-        where pd.fid_pedido = p.id_pedido order by 1
-      ) det
-    )consumo
-    from venta.pedido p
-    join seguridad.usuario u on u.id_usuario = p.fid_usuario 
-    where p.estado in ('CONFIRMADO','IMPRESO','CONCILIADO') and p.fid_control_caja = ${id || null} order by 1 asc;`;
+  if(opcion == 'T') q = `select * from negocio.prestamo p where p.activo=1 order by p.id_prestamo desc;`;
+  if(opcion != 'T') q = `select * from negocio.prestamo p where p.activo=1 and ${opcion} = ${id} order by p.id_prestamo desc;`;
 
   try {
     const consulta = await da.consulta(q);
@@ -227,12 +168,10 @@ export const listarPedidos  = async  (datos, respuesta, next) => {
   }
 };
 
-export const crudPedido = async  (datos, respuesta, next) => {
-  const {operacion,id_pedido,fid_usuario,fid_control_caja,mesa,monto_qr,monto_efectivo,monto_tarjeta,monto_vale,estado,usuario_registro} = datos.query;
+export const crudPrestamo = async  (datos, respuesta, next) => {
+  const {operacion,id_prestamo,codigo_prestamo,fid_cliente,fid_prenda,monto_prestamo,tasa_interes_mensual,tipo_interes,plazo_meses,fecha_desembolso,fecha_vencimiento,estado_prestamo,tipo_garantia,periodo_pago,monto_total_pagar,saldo_pendiente,dias_gracia,usuario_registro} = datos.query;
 
-  let q = `select * from venta.pra_crud_pedido('${operacion}',${id_pedido},${fid_usuario},${fid_control_caja},'${mesa}',${monto_qr},${monto_efectivo},${monto_tarjeta},${monto_vale},'${estado}',${usuario_registro});`;
-
-  if(operacion == 'CONCILIAR') q = `update venta.pedido set estado='CONCILIADO' where id_pedido in (${id_pedido}) and fid_control_caja = ${fid_control_caja};`
+  let q = `select * from venta.pra_crud_prestamo('${operacion}',${id_prestamo},'${codigo_prestamo}',${fid_cliente},${fid_prenda},${monto_prestamo},${tasa_interes_mensual},'${tipo_interes}',${plazo_meses},'${fecha_desembolso}','${fecha_vencimiento}','${estado_prestamo}','${tipo_garantia}','${periodo_pago}',${monto_total_pagar},${saldo_pendiente},${dias_gracia},${usuario_registro});`;
 
   const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
 
@@ -244,12 +183,12 @@ export const crudPedido = async  (datos, respuesta, next) => {
   }
 };
 
-//pedidoDetalle
-export const listarPedidoDetalles  = async  (datos, respuesta, next) => {
+//renovaion
+export const listarRenovaciones  = async  (datos, respuesta, next) => {
   const {opcion,id} = datos.query
   let q = ''
-  if(opcion == 'T') q = `select * from venta.pedido_detalle pd where pd.activo=1`;
-  if(opcion != 'T') q = `select * from venta.pedido_detalle pd where pd.activo=1 and ${opcion} = '${id}';`;
+  if(opcion == 'T') q = `select * from negocio.renovacion r where r.activo=1 order by r.id_renovacion desc;`;
+  if(opcion != 'T') q = `select * from negocio.renovacion r where r.activo=1 and ${opcion} = '${id}';`;
 
   try {
     const consulta = await da.consulta(q);
@@ -259,152 +198,10 @@ export const listarPedidoDetalles  = async  (datos, respuesta, next) => {
   }
 };
 
-export const crudPedidoDetalle = async  (datos, respuesta, next) => {
-  const {operacion,id_pedido_detalle,fid_pedido,fid_producto,fid_mezclador,fid_promocion,cantidad,descuento,precio_venta,fid_codigo_sync} = datos.query;
+export const crudRenovacion = async  (datos, respuesta, next) => {
+  const {operacion,id_renovacion,fid_prestamo_original,fid_prestamo_nuevo,motivo_renovacion,monto_capital_previo,intereses_pagados,multas_acumuladas,fecha_renovacion,observaciones,usuario_registro} = datos.query;
 
-  let q = `select * from venta.pra_crud_pedido_detalle('${operacion}',${id_pedido_detalle},${fid_pedido},${fid_producto},${fid_mezclador},${fid_promocion},${cantidad},${descuento},${precio_venta},'${fid_codigo_sync}');`;
-
-  const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
-
-  try {
-    const consulta = await da.consulta(mod);
-    respuesta.status(200).json(consulta);
-  } catch (error) {
-    next(error)
-  }
-};
-
-//producto
-export const listarProductos  = async  (datos, respuesta, next) => {
-  const {opcion,id} = datos.query
-  let q = ''
-  if(opcion == 'T') q = `select p.*,(select array_to_json(array_agg(row_to_json(det)))
-      from (select c.*,pd.descripcion item
-        from venta.componente c join venta.producto pd on c.fid_producto =pd.id_producto 
-        where c.fid_producto_main = p.id_producto and c.activo =1 
-      ) det
-    )componentes
-    from venta.producto p where p.activo=1 order by p.descripcion;`;
-  if(opcion != 'T') q = `select p.*,(select array_to_json(array_agg(row_to_json(det)))
-      from (select c.*, pd.descripcion item
-        from venta.componente c join venta.producto pd on c.fid_producto =pd.id_producto 
-        where c.fid_producto_main = p.id_producto and c.activo =1 
-      ) det
-    )componentes
-    from venta.producto p where p.activo=1 and ${opcion} = '${id}' order by p.descripcion;`;
-  if(opcion == 'PEDIDO') q = `select p.id_producto ,p.descripcion,p.unidad,p.grupo
-      ,sp.id_sucursal_producto,sp.existencia,sp.precio,sp.promocion
-      ,p2.id_producto id_pc, p2.descripcion mezclador,c.cantidad 
-      from venta.producto p join venta.sucursal_producto sp
-      on sp.fid_producto =p.id_producto and sp.fid_sucursal = 1
-      left join venta.componente c on c.fid_producto_main = p.id_producto and c.unidad ='BOTELLA' and c.activo =1
-      left join venta.producto p2 on p2.id_producto = c.fid_producto  
-      where p.tipo_producto ='VENTA' and p.activo =1 order by p.grupo, p.descripcion;`;
-
-  try {
-    const consulta = await da.consulta(q);
-    respuesta.status(200).json(consulta);
-  } catch (error) {
-    next(error)
-  }
-};
-
-export const crudProducto = async  (datos, respuesta, next) => {
-  const {operacion,id_producto,codigo,descripcion,unidad,capacidad,pedido_minimo,tipo_producto,grupo,usuario_registro} = datos.query;
-
-  let q = `select * from venta.pra_crud_producto('${operacion}',${id_producto},'${codigo}','${descripcion}','${unidad}','${capacidad}',${pedido_minimo},'${tipo_producto}','${grupo}',${usuario_registro});`;
-
-  const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
-
-  try {
-    const consulta = await da.consulta(mod);
-    respuesta.status(200).json(consulta);
-  } catch (error) {
-    next(error)
-  }
-};
-
-//promocion
-export const listarPromociones  = async  (datos, respuesta, next) => {
-  const {opcion,id} = datos.query
-  let q = ''
-  if(opcion == 'T') q = `SELECT p.*, s.nombre AS sucursal,
-    ( SELECT array_to_json(array_agg(row_to_json(det)))
-      FROM (SELECT pr.id_producto, pr.descripcion, pr.unidad
-            FROM venta.producto pr  
-            WHERE pr.activo = 1 
-            AND pr.id_producto = ANY(string_to_array(p.productos, ',')::int[])
-      ) det
-    ) AS productos
-    ,(SELECT string_agg(dias_map.nombre, ', ')
-        FROM unnest(string_to_array(p.dias, ',')) AS d
-        JOIN (VALUES ('1', 'Lunes'),('2', 'Martes'),('3', 'Miércoles'),
-                ('4', 'Jueves'),('5', 'Viernes'),('6', 'Sábado'),('7', 'Domingo')
-        ) AS dias_map(numero, nombre) ON d = dias_map.numero
-    ) AS dias_nombres
-    FROM venta.promocion p 
-    JOIN seguridad.sucursal s ON s.id_sucursal = p.fid_sucursal
-    WHERE p.activo = 1;`;
-  if(opcion == 'SUCURSAL') q = `SELECT p.*, s.nombre AS sucursal,
-    ( SELECT array_to_json(array_agg(row_to_json(det)))
-      FROM (SELECT pr.id_producto, pr.descripcion, pr.unidad
-            FROM venta.producto pr  
-            WHERE pr.activo = 1 
-            AND pr.id_producto = ANY(string_to_array(p.productos, ',')::int[])
-      ) det
-    ) AS productos
-    ,(SELECT string_agg(dias_map.nombre, ', ')
-      FROM unnest(string_to_array(p.dias, ',')) AS d
-      JOIN (VALUES ('1', 'Lunes'),('2', 'Martes'),('3', 'Miércoles'),
-              ('4', 'Jueves'),('5', 'Viernes'),('6', 'Sábado'),('7', 'Domingo')
-      ) AS dias_map(numero, nombre) ON d = dias_map.numero
-    ) AS dias_nombres
-    FROM venta.promocion p 
-    JOIN seguridad.sucursal s ON s.id_sucursal = p.fid_sucursal
-    WHERE p.activo = 1 and p.fid_sucursal in (${id},5);`;
-//TODO: hacer cambios para jalar prdouctos como un agregate, del id y descripcion
-  try {
-    const consulta = await da.consulta(q);
-    respuesta.status(200).json(consulta);
-  } catch (error) {
-    next(error)
-  }
-};
-
-export const crudPromocion= async  (datos, respuesta, next) => {
-  const {operacion,id_promocion,fid_sucursal,nombre,dias,hora_inicio,hora_fin,grupo_producto,productos,cantidad,descuento,precio,usuario_registro} = datos.query;
-
-  let q = `select * from venta.pra_crud_promocion('${operacion}',${id_promocion},${fid_sucursal},'${nombre}','${dias}','${hora_inicio}','${hora_fin}','${grupo_producto}','${productos}',${cantidad},${descuento},${precio},${usuario_registro});`;
-
-  const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
-
-  try {
-    const consulta = await da.consulta(mod);
-    respuesta.status(200).json(consulta);
-  } catch (error) {
-    next(error)
-  }
-};
-
-//PROVEEDOR
-export const listarProveedores  = async  (datos, respuesta, next) => {
-  const {opcion,id} = datos.query
-  let q = ''
-  if(opcion == 'T') q = `select * from venta.proveedor p where p.activo=1`;
-  if(opcion != 'T') q = `select * from venta.proveedor p where p.activo=1 and ${opcion} = '${id}';`;
-
-  try {
-    const consulta = await da.consulta(q);
-    respuesta.status(200).json(consulta);
-  } catch (error) {
-    next(error)
-  }
-};
-
-export const crudProveedor = async  (datos, respuesta, next) => {
-  const {operacion,id_proveedor,nombre,direccion,referencia,telefonos,cuenta,usuario_registro} = datos.query;
-
-  let q = `select * from venta.pra_crud_proveedor('${operacion}',${id_proveedor},'${nombre}','${direccion}','${referencia}','${telefonos}','${cuenta}',${usuario_registro});`;
+  let q = `select * from venta.pra_crud_renovacion('${operacion}',${id_renovacion},${fid_prestamo_original},${fid_prestamo_nuevo},'${motivo_renovacion}',${monto_capital_previo},${intereses_pagados},${multas_acumuladas},'${fecha_renovacion}','${observaciones}',${usuario_registro});`;
 
   const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
 
@@ -521,7 +318,7 @@ export const listarDashboard  = async  (datos, respuesta, next) => {
   }
 };
 
-export const reportesVentas = async  (datos, respuesta, next) => {
+export const reportesNegocio = async  (datos, respuesta, next) => {
   const {tipo,id,f1,f2} = datos.query;
   datos.setTimeout(300000);
   respuesta.setTimeout(300000);
@@ -579,44 +376,6 @@ export const reportesVentas = async  (datos, respuesta, next) => {
     respuesta.setHeader('Content-Type', contentType);
     respuesta.setHeader('Content-Disposition', `attachment; filename="reporte_${new Date().getTime()}.${ext}"`);
     respuesta.send(result.data);
-
-    // carbone.render(
-    //   pathTemplate,
-    //   miData,
-    //   optionsReport,
-    //   (err, buffer, filename) => {
-    //     // if (err) console.log(err);
-    //     // if (!buffer) console.log(err);
-    //     // console.log('el buff',buffer,filename);
-    //     // respuesta.type('application/xlsx');
-    //     // respuesta.setHeader('Content-disposition', `attachment; filename=${filename}.xlsx`);
-    //     // respuesta.send(Buffer.from(buffer, 'binary'));
-    //     // return respuesta;
-    //     if (err) {
-    //       console.error('Error en Carbone:', err);
-    //       return respuesta.status(500).send(err);
-    //     }
-
-    //     // Detectar el tipo de contenido dinámicamente
-    //     // convertTo : tipo.includes('docx') ?  'pdf' : 'xlsx'
-        
-    //     const isPdf = tipo.includes('docx');//optionsReport.convertTo === 'pdf';
-    //     const contentType = isPdf ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    //     const ext = isPdf ? 'pdf' : 'xlsx';
-
-    //     respuesta.setHeader('Content-Type', contentType);
-    //     respuesta.setHeader('Content-Disposition', `attachment; filename="reporte_${new Date().getTime()}.${ext}"`);
-    //     carbone.convert(buffer, {convertTo: isPdf ? 'pdf' : 'xlsx',extension:isPdf ? 'docx':'ods'}, function (err, result) {
-    //       if (err) {
-    //         console.error('Error en Convert:', err);
-    //         return respuesta.status(500).send(err);
-    //       }
-    //       // Enviar el buffer directamente
-    //       respuesta.send(result);
-    //     });
-
-    //   }
-    // );
   } catch (error) {
     console.error('Error DB:', error);
     respuesta.status(500).send(error);
@@ -661,17 +420,3 @@ export const reportesRender  = async  (datos, respuesta, next) => {
     next(error)
   }
 };
-
-export const estadoMasivo = async  (datos, respuesta, next) => {
-  const {opcion,id} = datos.query;
-
-  let q = `update venta.pedido set estado='${opcion}' where id_pedido in (${id});`;
-
-  try {
-    const consulta = await da.consulta(q);
-    respuesta.status(200).json({estado:'ok',message: 'Estado actualizado correctamente'});
-  } catch (error) {
-    next(error)
-  }
-};
-

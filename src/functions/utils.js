@@ -119,7 +119,7 @@ const armarCRUD = (campos, esquema, tabla) => {
       console.log("se creo todo bien", plantilla);
       armado = {
         template: plantilla,
-        message: "Funcion CRUD creada Satisfactoriamente",
+        message: `Funcion CRUD ${esquema}.${tabla} creada Satisfactoriamente`,
       };
       resolve(armado);
     } catch (error) {

@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import loginRoutes from './src/routes/login.routes.js';
 import seguridadRoutes from './src/routes/seguridad.routes.js';
 import negocioRoutes from './src/routes/negocio.routes.js';
+import contabilidad from './src/routes/contabilidad.routes.js'
 import logger from './src/middlewares/logReq.js';
 import {errorHandler as error} from './src/middlewares/errorHandler.js';
 import {tokenAuth} from './src/middlewares/seguridadToken.js';
@@ -29,7 +30,9 @@ app.use("/uploads", express.static(path.resolve("src/uploads")));
 app.use(loginRoutes);
 app.use(seguridadRoutes);
 app.use(negocioRoutes);
+app.use(contabilidad);
 
+//ERROR HANDLER
 app.use(error)
 
 app.listen(process.env.PORT,()=> console.log(`Corriendo en el puerto ${process.env.PORT}`))
