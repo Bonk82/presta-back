@@ -7,8 +7,8 @@ const router = Router();
 
 router.get('/listarUsuarios/', seguridad.listarUsuarios)
 router.get('/crudUsuario/', seguridad.crudUsuario)
-router.get('/listarClasificador/', seguridad.listarClasificador)
-router.get('/crudClasificador/', seguridad.crudClasificador)
+router.get('/listarConfiguracion/', seguridad.listarConfiguracion)
+router.get('/crudConfiguracion/', seguridad.crudConfiguracion)
 router.get('/listarSucursales/', seguridad.listarSucursales)
 router.get('/crudSucursal/', seguridad.crudSucursal)
 router.get('/listarMenu/', seguridad.listarMenu)

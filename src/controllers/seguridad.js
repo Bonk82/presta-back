@@ -51,11 +51,11 @@ export const crudUsuario   = async  (datos, respuesta, next) => {
 };
 
 //clasificador
-export const listarClasificador  = async  (datos, respuesta, next) => {
+export const listarConfiguracion  = async  (datos, respuesta, next) => {
   const {opcion,id} = datos.query
   let q = ''
-  if(opcion == 'T') q = `select * from seguridad.clasificador c where c.activo = 1;`;
-  if(opcion != 'T') q = `select * from seguridad.clasificador c where c.activo = 1 and ${opcion} = '${id}';`;
+  if(opcion == 'T') q = `select * from seguridad.configuracion c where c.activo = 1;`;
+  if(opcion != 'T') q = `select * from seguridad.configuracion c where c.activo = 1 and ${opcion} = '${id}';`;
 
   try {
     const consulta = await da.consulta(q);
@@ -65,10 +65,10 @@ export const listarClasificador  = async  (datos, respuesta, next) => {
   }
 };
 
-export const crudClasificador   = async  (datos, respuesta, next) => {
-  const {operacion,id_clasificador,grupo,orden,nombre,sub_grupo} = datos.query;
+export const crudConfiguracion   = async  (datos, respuesta, next) => {
+  const {operacion,id_configuracion,grupo,nombre,sub_grupo,valor,orden} = datos.query;
 
-  let q = `select * from seguridad.pra_crud_clasificador('${operacion}',${id_clasificador},'${grupo}',${orden},'${nombre}','${sub_grupo}');`;
+  let q = `select * from seguridad.pra_crud_configuracion('${operacion}',${id_configuracion},'${grupo}',${orden},'${nombre}','${sub_grupo}','${valor}');`;
 
   const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
 
