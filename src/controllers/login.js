@@ -18,7 +18,7 @@ export const login = async (datos, respuesta, next) => {
     const consulta = await da(q);
     console.log("del login", consulta);
     if(consulta[0]){
-      newToken = jwt.sign({ exp: Math.floor(Date.now() / 1000) + (60*60*14),cnx: consulta[0].id_con,id_rol: consulta[0].id_rol,usuario: consulta[0].id_usuario, sucursal: consulta[0].id_sucursal,cuenta:user, rol:consulta[0].rol}, process.env.TOKEN_PWD);
+      newToken = jwt.sign({ exp: Math.floor(Date.now() / 1000) + (60*60*12),cnx: consulta[0].id_con,id_rol: consulta[0].id_rol,usuario: consulta[0].id_usuario, sucursal: consulta[0].id_sucursal,cuenta:user, rol:consulta[0].rol}, process.env.TOKEN_PWD);
       // ip = datos.headers['x-forwarded-for'] || datos.socket.remoteAddress || null;
       const rev_ip = await da(`select * from seguridad.sucursal where ip = '${ip}'`);
       console.log({rev_ip});

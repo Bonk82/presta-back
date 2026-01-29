@@ -6,8 +6,8 @@ import fs from 'fs'
 export const listarClientes  = async  (datos, respuesta, next) => {
   const {opcion,id} = datos.query
   let q = ''
-  if(opcion == 'T') q = `select * from negocio.cliente c where c.activo=1`;
-  if(opcion != 'T') q = `select * from negocio.cliente c where c.activo=1 and ${opcion} = '${id}';`;
+  if(opcion == 'T') q = `select *,concat_ws(' ',c.nombres,c.paterno,c.materno) as nombre_completo from negocio.cliente c where c.activo=1 order by 5,6,7`;
+  if(opcion != 'T') q = `select * from negocio.cliente c where c.activo=1 and ${opcion} = '${id}' order by 5,6,7;`;
   try {
     const consulta = await da.consulta(q);
     respuesta.status(200).json(consulta);
@@ -127,8 +127,8 @@ export const crudPago = async  (datos, respuesta, next) => {
 export const listarPrendas  = async  (datos, respuesta, next) => {
   const {opcion,id} = datos.query
   let q = ''
-  if(opcion == 'T') q = `select * from negocio.prenda p where p.activo=1`;
-  if(opcion != 'T') q = `select * from negocio.prenda p where p.activo=1 and ${opcion} = '${id}';`;
+  if(opcion == 'T') q = `select * from negocio.prenda p where p.activo=1 order by 1 desc`;
+  if(opcion != 'T') q = `select * from negocio.prenda p where p.activo=1 and ${opcion} = '${id}' order by 1 desc;`;
 
   try {
     const consulta = await da.consulta(q);
@@ -141,7 +141,7 @@ export const listarPrendas  = async  (datos, respuesta, next) => {
 export const crudPrenda= async  (datos, respuesta, next) => {
   const {operacion,id_prenda,codigo_prenda,tipo_prenda,subtipo_prenda,descripcion,material,quilates,peso_bruto,peso_neto,marca,modelo,serie,dimensiones,estado_prenda,condiciones,valor_avaluo,valor_prestamo,porcentaje_prestamo,ubicacion_almacen,fotografia_url,usuario_registro} = datos.query;
 
-  let q = `select * from negocio.pra_crud_prenda('${operacion}',${id_prenda},'${codigo_prenda}','${tipo_prenda}','${subtipo_prenda}','${descripcion}','${material}',${quilates},${peso_bruto},${peso_neto},'${marca}','${modelo}','${serie}','${dimensiones}','${estado_prenda}','${condiciones}',${valor_avaluo},${valor_prestamo},${porcentaje_prestamo},'${ubicacion_almacen}','${fotografia_url}',${usuario_registro});`;
+  let q = `select * from negocio.pra_crud_prenda('${operacion}',${id_prenda},'${codigo_prenda}','${tipo_prenda}','${subtipo_prenda}','${descripcion}','${material}','${quilates}',${peso_bruto},${peso_neto},'${marca}','${modelo}','${serie}','${dimensiones}','${estado_prenda}','${condiciones}',${valor_avaluo},${valor_prestamo},${porcentaje_prestamo},'${ubicacion_almacen}','${fotografia_url}',${usuario_registro});`;
 
   const mod = q.replace(/undefined/gi,`null`).replace(/'null'/gi,`null`).replace(/''/g,`null`).replace(/,,/g,`,null,`);
 
